@@ -21,13 +21,6 @@
 #include <math.h>
 #include <stdio.h>
 
-float step = 70;
-float mi; // 幂
-// float rus; // 10的幂次方
-// float r_ms = 0;
-// #define USER_BAUD (115200UL)
-// #define USER_UART_BAUD ((SYSCLK - USER_BAUD) / (USER_BAUD))
-
 volatile bit flag_is_in_power_on; // 是否处于开机缓启动
 
 #if USE_MY_DEBUG // 打印串口配置
@@ -63,38 +56,6 @@ void my_debug_config(void)
                  UART_EN(0x1); // 8bit数据，1bit停止位
 }
 #endif // USE_MY_DEBUG // 打印串口配置
-
-// 开机缓启动，调节占空比：
-void adjust_pwm_duty_when_power_on(void)
-{
-    // if (jump_flag == 1)
-    // {
-    //     // break;
-    //     return
-    // }
-    // if (c_duty < 6000)
-    if (cur_pwm_channel_0_duty < MAX_PWM_DUTY &&
-        cur_pwm_channel_1_duty < MAX_PWM_DUTY)
-    {
-        mi = (step - 1) / (253 / 3) - 1;
-        step += 0.5;
-        // cur_pwm_channel_0_duty = pow(5, mi) * 60; // C 库函数 double pow(double x, double y) 返回 x 的 y 次幂
-        // cur_pwm_channel_1_duty = pow(5, mi) * 60; // C 库函数 double pow(double x, double y) 返回 x 的 y 次幂
-        cur_pwm_channel_0_duty = pow(5, mi) * 60; // C 库函数 double pow(double x, double y) 返回 x 的 y 次幂
-        cur_pwm_channel_1_duty = cur_pwm_channel_0_duty;
-    }
-
-    if (cur_pwm_channel_0_duty >= MAX_PWM_DUTY ||
-        cur_pwm_channel_1_duty >= MAX_PWM_DUTY)
-    {
-        cur_pwm_channel_0_duty = MAX_PWM_DUTY;
-        cur_pwm_channel_1_duty = MAX_PWM_DUTY;
-    }
-    // printf("c_duty %d\n",c_duty);
-
-    // delay_ms(16); // 每16ms调整一次PWM的脉冲宽度 ---- 校验码A488对应的时间
-    // delay_ms(11); // 16 * 0.666 约为10.656   ---- 校验码B5E3对应的时间
-}
 
 void main(void)
 {
@@ -163,6 +124,7 @@ void main(void)
 
     rf_recv_init(); // rf功能初始化
     fan_ctl_config();
+    delay_ms(1); // 延时，等待系统稳定
 #endif
 
     limited_max_pwm_duty = MAX_PWM_DUTY;
@@ -170,72 +132,14 @@ void main(void)
     limited_pwm_duty_due_to_temp = MAX_PWM_DUTY;
     limited_pwm_duty_due_to_unstable_engine = MAX_PWM_DUTY;
 
-// ===================================================================
-#if 1 // 开机缓慢启动（PWM信号变化平缓）
-
-    P14 = 0; // 16脚先输出低电平
-    // c_duty = 0;
-    cur_pwm_channel_0_duty = 0;
-    cur_pwm_channel_1_duty = 0;
-    flag_is_in_power_on = 1; // 表示到了开机缓启动
-    // while (c_duty < 6000)
-    // while (c_duty < limited_max_pwm_duty) // 当c_duty 大于 限制的最大占空比后，退出
-    while (cur_pwm_channel_0_duty < limited_max_pwm_duty || /* 当 cur_pwm_channel_0_duty 大于 限制的最大占空比后，退出 */
-           cur_pwm_channel_1_duty < limited_max_pwm_duty)   /* 当 cur_pwm_channel_1_duty 大于 限制的最大占空比后，退出 */
-    {
-        // adc_update_pin_9_adc_val();        // 采集并更新9脚的ad值
-        update_max_pwm_duty_coefficient(); // 更新当前的最大占空比
-
-#if USE_MY_DEBUG // 直接打印0，防止在串口+图像上看到错位
-
-        // printf(",b=0,"); // 防止在串口图像错位
-
-#endif
-
-        if (flag_is_pwm_sub_time_comes) // pwm递减时间到来（该标志位主要用在发动机功率不稳定检测中）
-        {
-            flag_is_pwm_sub_time_comes = 0;
-
-            /*
-                只要有一次跳动，退出开机缓启动(改成等到变为 limited_max_pwm_duty 再退出)，
-                由于 adjust_duty 初始值为 MAX_PWM_DUTY ，直接退出会直接设置占空比为 adjust_duty 对应的值，
-                会导致灯光闪烁一下
-
-                目前没有使用提前退出开机缓启动的功能
-            */
-            // if (adc_val_pin_9 >= ADC_VAL_WHEN_UNSTABLE)
-            // {
-            //     // if (c_duty >= PWM_DUTY_100_PERCENT)
-            //     // if (c_duty >= limited_max_pwm_duty)
-            //     if (cur_pwm_channel_0_duty >= limited_max_pwm_duty &&
-            //         cur_pwm_channel_1_duty >= limited_max_pwm_duty)
-            //     {
-            //         // adjust_duty = c_duty;
-            //         break;
-            //     }
-            // }
-        }
-
-        if (flag_time_comes_during_power_on) // 如果调节时间到来 -- 13ms
-        {
-            flag_time_comes_during_power_on = 0;
-            adjust_pwm_duty_when_power_on();
-        }
-
-        set_pwm_channel_0_duty(cur_pwm_channel_0_duty);
-        set_pwm_channel_1_duty(cur_pwm_channel_1_duty);
-        // set_pwm_duty(); // 将 c_duty 写入pwm对应的寄存器
-        // set_p15_pwm_duty(c_duty);
-
-#if USE_MY_DEBUG
-        // printf("power_on_duty %u\n", c_duty);
-#endif //  USE_MY_DEBUG
-    }
-#endif // 开机缓慢启动（PWM信号变化平缓）
-
-    // 缓启动后，立即更新 adjust_duty 的值：
+    // 去掉缓启动之后，cur_pwm_channel_x_duty 的值直接设置为最亮，立即改变 adjust_duty 的值
+    cur_pwm_channel_0_duty = MAX_PWM_DUTY;
+    cur_pwm_channel_1_duty = MAX_PWM_DUTY;
+    set_pwm_channel_0_duty(cur_pwm_channel_0_duty);
+    set_pwm_channel_1_duty(cur_pwm_channel_1_duty);
     adjust_pwm_channel_0_duty = cur_pwm_channel_0_duty;
     adjust_pwm_channel_1_duty = cur_pwm_channel_1_duty;
+
     flag_is_in_power_on = 0; // 表示退出了开机缓启动
     // ===================================================================
 

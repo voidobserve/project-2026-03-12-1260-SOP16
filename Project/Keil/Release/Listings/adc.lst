@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 1   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ADC
@@ -62,7 +62,7 @@ line level    source
   50          //     // adc0_val = 0;
   51          //     static u8 last_adc_sel = 0;
   52          //     if (last_adc_sel == adc_sel)
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 2   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 2   
 
   53          //     {
   54          //         // 如果当前采集adc的引脚就是要配置的adc引脚，不用再继续配置，直接�
@@ -126,7 +126,7 @@ line level    source
  105          //         ADC_CHS0 = ADC_ANALOG_CHAN(0x19) | // 选则引脚对应的通道（0x19--P31）
  106          //                    ADC_EXT_SEL(0x0);       // 选择外部通道
  107          
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 3   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 3   
 
  108          //         break;
  109          
@@ -190,7 +190,7 @@ line level    source
                               (0x01 << 2) | // ADC2 通道中断使能
                               (0x01 << 1) | // ADC1 通道中断使能
                               (0x01 << 0);  // ADC0 通道中断使能
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 4   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 4   
 
                   ADC_CFG2 = 0xFF;          // 通道0 采样时间配置为256个采样时钟周期
                   ADC_CFG3 = 0xFF;          // 通道1 采样时间配置为256个采样时钟周期
@@ -254,7 +254,7 @@ line level    source
               
                   switch (adc_sel_pin)
                   {
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 5   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 5   
 
                   case ADC_SEL_PIN_GET_TEMP:
                   {
@@ -318,7 +318,7 @@ line level    source
  278   3                         ADC_EXT_SEL(0x0);       // 选择外部通道
  279   3          }
  280   2          break;
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 6   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 6   
 
  281   2      
  282   2          case ADC_SEL_PIN_TEMP:
@@ -382,7 +382,7 @@ line level    source
  332          // {
  333          //     u8 i = 0; // adc采集次数的计数
  334          //     volatile u16 g_temp_value = 0;
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 7   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 7   
 
  335          //     volatile u32 g_tmpbuff = 0;
  336          //     volatile u16 g_adcmax = 0;
@@ -446,7 +446,7 @@ line level    source
  392   2          }
  393   1      
  394   1          voltage = get_voltage_from_pin(); // 得到热敏电阻上的电压
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 8   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 8   
 
  395   1      
  396   1      #if USE_MY_DEBUG
@@ -510,7 +510,7 @@ line level    source
  450   3                  {
  451   4                      cnt = 0;
  452   4                  }
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 9   
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 9   
 
  453   3      
  454   3                  if (cnt >= 10)
@@ -574,7 +574,7 @@ line level    source
  510          
  511          void fan_scan(void)
  512          {
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 10  
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 10  
 
  513   1          u16 adc_val = adc_val_from_fan; // adc_val_from_fan 由adc中断触发
  514   1      
@@ -638,7 +638,7 @@ line level    source
               
                       if (ADC2_STATUS_SEL_GET_TEMP == cur_adc2_status)
                       {
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 11  
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 11  
 
                           // 如果当前对应的是获取温度的adc通道
                           adc_val_from_temp = (ADC_DATAH2 << 4) | (ADC_DATAL2 >> 4);
@@ -702,7 +702,7 @@ line level    source
  632   3                  // printf("2 knob scan done\n");
  633   3              }
  634   2              else if (ADC_STATUS_SEL_GET_TEMP == cur_adc_status)
-C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:24:26 PAGE 12  
+C51 COMPILER V9.60.7.0   ADC                                                               03/12/2026 15:48:27 PAGE 12  
 
  635   2              {
  636   3                  // 更新热敏电阻检测一端的ad值

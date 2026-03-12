@@ -66,21 +66,6 @@ void TIMR0_IRQHandler(void) interrupt TMR0_IRQn
     {
         TMR0_CONH |= TMR_PRD_PND(0x1); // 清除pending
 
-        // ms_cnt++;
-        cnt_during_power_on++;
-
-        // if (ms_cnt >= 25)
-        // {
-        //     ms_cnt = 0;
-        //     // tmr0_flag = 1;
-        // }
-
-        if (cnt_during_power_on >= 13) // 13ms
-        {
-            cnt_during_power_on = 0;
-            flag_time_comes_during_power_on = 1; // 开机缓启动期间，控制每次调节PWM占空比的时间
-        }
-
         if (rf_key_para.cur_scan_times < 255)
         {
             rf_key_para.cur_scan_times++; // 用于433遥控器按键扫描
